@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Mathematics-MMUS & Spotify + Kalkulator</title>
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  background:#0f0f1a url('background.jpg') no-repeat center center/cover;
+  color:white;
+  position:relative;
+}
+body::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  z-index:0;
+}
+.container{
+  position:relative;
+  z-index:1;
+  width:95%;
+  max-width:900px;
+  text-align:center;
+}
+h1{text-shadow:0 0 15px cyan;}
+.buttonGroup{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin:10px 0;
+  flex-wrap:wrap;
+}
+button{
+  padding:8px 15px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:bold;
+  background:linear-gradient(45deg,#ff00cc,#3333ff);
+  color:white;
+}
+input{
+  padding:8px;
+  border-radius:8px;
+  border:none;
+  width:120px;
+  text-align:center;
+}
+.score, .history{
+  background: rgba(255,255,255,0.1);
+  padding:10px;
+  border-radius:15px;
+  margin:10px 0;
+}
+.message{ color: yellow; font-weight:bold; }
+.hp-bar{
+  height: 20px;
+  background: red;
+  border-radius: 5px;
+  margin:5px 0;
+  width:100%;
+}
+.player-container{ text-align:left; margin-bottom:10px; }
+
+/* Kalkulator */
+.calcContainer{
+  margin-top:20px;
+  background: rgba(0,0,0,0.6);
+  display:inline-block;
+  padding:15px;
+  border-radius:15px;
+}
+.calcScreen{
+  width:240px;
+  margin-bottom:10px;
+  text-align:right;
+  padding:10px;
+  border-radius:5px;
+  border:none;
+  font-size:20px;
+  font-weight:bold;
+}
+.calcButtons{
+  display:grid;
+  grid-template-columns: repeat(4, 60px);
+  grid-gap:8px;
+  justify-content:center;
+}
+.calcButtons button{
+  font-size:18px;
+  font-weight:bold;
+  padding:15px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  color:white;
+  transition: transform 0.1s;
+}
+.calcButtons button:hover{
+  transform: scale(1.1);
+}
+/* Warna tombol berbeda */
+.calcButtons button:nth-child(1), .calcButtons button:nth-child(2), .calcButtons button:nth-child(3), .calcButtons button:nth-child(5), .calcButtons button:nth-child(6), .calcButtons button:nth-child(7), .calcButtons button:nth-child(9), .calcButtons button:nth-child(10), .calcButtons button:nth-child(11), .calcButtons button:nth-child(13){
+  background: #5555ff;
+}
+.calcButtons button:nth-child(4), .calcButtons button:nth-child(8), .calcButtons button:nth-child(12), .calcButtons button:nth-child(16){
+  background: #ff5555;
+}
+.calcButtons button:nth-child(14), .calcButtons button:nth-child(15){
+  background: #55ff55;
+}
+.calcButtons button:nth-child(17){
+  background: #ffaa00;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Mathematics-MMUS & Spotify + Kalkulator</h1>
+
+<p>Pilih Mode:</p>
+<div class="buttonGroup">
+<button onclick="setMode('2')">2 Player</button>
+<button onclick="setMode('3')">3 Player</button>
+<button onclick="setMode('4')">4 Player</button>
+<button onclick="setMode('ai')">Mode AI</button>
+</div>
+
+<p>Pilih Level:</p>
+<div class="buttonGroup">
+<button onclick="setLevel('easy')">Mudah</button>
+<button onclick="setLevel('hard')">Sulit</button>
+<button onclick="setLevel('extreme')">Ekstrem</button>
+</div>
+
+<p>Musik:</p>
+<div class="buttonGroup">
+<input type="file" id="musicFile">
+<button onclick="playMusic()">Putar Musik</button>
+<button onclick="stopMusic()">Stop Musik</button>
+</div>
+
+<div class="score" id="scoreBoard"></div>
+<div id="question">Pilih mode & level</div>
+<div class="buttonGroup">
+<input type="number" id="answer">
+</div>
+<div class="buttonGroup">
+<button onclick="submitAnswer()">Jawab</button>
+<button onclick="startGame()">Start</button>
+</div>
+<div class="message" id="message"></div>
+<div class="history">
+<h3>📜 History Pertandingan</h3>
+<div id="history"></div>
+</div>
+
+<audio id="bgm" loop></audio>
+
+<!-- Kalkulator -->
+<div class="calcContainer">
+<input type="password" id="calcPass" placeholder="Password Kalkulator">
+<button onclick="openCalc()">Buka Kalkulator</button>
+<div id="calculator" style="display:none;">
+<input type="text" id="calcScreen" class="calcScreen" readonly>
+<div class="calcButtons">
+<button onclick="calcPress('7')">7</button>
+<button onclick="calcPress('8')">8</button>
+<button onclick="calcPress('9')">9</button>
+<button onclick="calcPress('/')">/</button>
+
+<button onclick="calcPress('4')">4</button>
+<button onclick="calcPress('5')">5</button>
+<button onclick="calcPress('6')">6</button>
+<button onclick="calcPress('*')">*</button>
+
+<button onclick="calcPress('1')">1</button>
+<button onclick="calcPress('2')">2</button>
+<button onclick="calcPress('3')">3</button>
+<button onclick="calcPress('-')">-</button>
+
+<button onclick="calcPress('0')">0</button>
+<button onclick="calcPress('.')">.</button>
+<button onclick="calcPress('%')">%</button>
+<button onclick="calcPress('+')">+</button>
+
+<button onclick="calcPress('^')">^</button>
+<button onclick="calcDel()">DEL</button>
+<button onclick="calcClear()">AC</button>
+<button onclick="calcEvaluate()">=</button>
+</div>
+</div>
+</div>
+
+<script>
+let mode="", level="", currentAnswer=0, players=[], turn=0;
+let semangat=["🔥 Jangan menyerah!","💪 Ayo bangkit!","⚡ Kamu pasti bisa!","🚀 Fokus lagi!","🧠 Serius dikit!"];
+let replayData = [];
+let sounds = {
+correct: new Audio('https://freesound.org/data/previews/320/320181_5260877-lq.mp3'),
+wrong: new Audio('https://freesound.org/data/previews/170/170499_2437358-lq.mp3')
+};
+let bgm=document.getElementById("bgm");
+
+// Game functions
+function setMode(m){ mode=m; document.getElementById("message").innerText="Mode: "+m; }
+function setLevel(l){ document.getElementById("message").innerText+=" | Level: "+l; }
+function playMusic(){
+    let fileInput=document.getElementById("musicFile");
+    if(fileInput.files.length>0){
+        let file=URL.createObjectURL(fileInput.files[0]);
+        bgm.src=file; bgm.play();
+    } else { alert("Pilih file musik terlebih dahulu"); }
+}
+function stopMusic(){ bgm.pause(); bgm.currentTime=0; }
+
+function startGame(){
+    players=[]; replayData=[];
+    if(mode==="2"||mode==="music"){ for(let i=1;i<=2;i++) players.push({name:"Player "+i,hp:5,score:0,ai:false}); }
+    if(mode==="3"||mode==="music"){ for(let i=1;i<=3;i++) players.push({name:"Player "+i,hp:5,score:0,ai:false}); }
+    if(mode==="4"||mode==="music"){ for(let i=1;i<=4;i++) players.push({name:"Player "+i,hp:5,score:0,ai:false}); }
+    if(mode==="ai"||mode==="music"){ players.push({name:"AI",hp:3,score:0,ai:true}); }
+    turn=0;
+    updateBoard(); generateQuestion();
+}
+
+function generateQuestion(){
+    let a=Math.floor(Math.random()*20)+1;
+    let b=Math.floor(Math.random()*20)+1;
+    let ops=["+","-","*","/"];
+    let op=ops[Math.floor(Math.random()*ops.length)];
+    currentAnswer=op==="+"?a+b:op==="-"?a-b:op==="*"?a*b:a/b;
+    document.getElementById("question").innerText=players[turn].name+": "+a+" "+op+" "+b+" = ?";
+    if(players[turn].ai) aiPlay();
+}
+
+function submitAnswer(){ let ans=Number(document.getElementById("answer").value); if(!players[turn].ai) checkAnswer(ans); }
+
+function checkAnswer(ans){
+    let player=players[turn];
+    if(Math.abs(ans-currentAnswer)<0.01){ player.score++; document.getElementById("message").innerText="Benar! 🔥"; sounds.correct.play();}
+    else{ player.hp--; document.getElementById("message").innerText="Salah! Jawaban: "+currentAnswer+" | "+semangat[Math.floor(Math.random()*semangat.length)]; sounds.wrong.play();}
+    replayData.push({player:player.name,answer:ans,correct:Math.abs(ans-currentAnswer)<0.01});
+    nextTurn();
+}
+
+function nextTurn(){
+    updateBoard();
+    let alive=players.filter(p=>p.hp>0);
+    if(alive.length<=1){
+        let winner=alive[0]||players[0];
+        document.getElementById("message").innerText="🏆 "+winner.name+" MENANG!";
+        addHistory();
+        return;
+    }
+    turn=(turn+1)%players.length;
+    while(players[turn].hp<=0) turn=(turn+1)%players.length;
+    document.getElementById("answer").value="";
+    generateQuestion();
+}
+
+function aiPlay(){
+    let typing="AI sedang mengetik"; let dots=0;
+    let interval=setInterval(()=>{dots=(dots+1)%4; document.getElementById("message").innerText=typing+".".repeat(dots);},500);
+    setTimeout(()=>{clearInterval(interval); let mistake=Math.random()<0.3; let aiAnswer=mistake?currentAnswer+5:currentAnswer; checkAnswer(aiAnswer);},1500);
+}
+
+function updateBoard(){
+    let html="";
+    players.forEach(p=>{ let hpPercent=(p.hp/5)*100; html+=`<div class="player-container">${p.name} | Skor: ${p.score}<br><div class="hp-bar" style="width:${hpPercent}%"></div></div>`; });
+    document.getElementById("scoreBoard").innerHTML=html;
+}
+
+function addHistory(){
+    let hist=document.getElementById("history");
+    let entry=document.createElement("div");
+    entry.innerHTML=`Match: ${new Date().toLocaleString()}<br>${replayData.map(r=>r.player+": "+(r.correct?"Benar":"Salah")).join("<br>")}`;
+    hist.prepend(entry);
+}
+
+// Kalkulator functions
+let calcScreen = document.getElementById("calcScreen");
+let calcPassword = "1234"; // default password
+
+function openCalc(){
+    let pass=document.getElementById("calcPass").value;
+    if(pass===calcPassword){
+        document.getElementById("calculator").style.display="block";
+    } else {
+        alert("Password salah!");
+    }
+}
+
+function calcPress(val){ calcScreen.value += val; }
+function calcClear(){ calcScreen.value = ""; }
+function calcDel(){ calcScreen.value = calcScreen.value.slice(0,-1); }
+function calcEvaluate(){
+    try{
+        let expression = calcScreen.value.replace(/\^/g, '**');
+        calcScreen.value = eval(expression);
+    } catch(e){ alert("Input salah!"); }
+}
+</script>
+</body>
+</html>
